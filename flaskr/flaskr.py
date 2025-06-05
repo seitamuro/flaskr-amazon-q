@@ -69,7 +69,18 @@ def show_entries():
         app.logger.error(f"Database error: {e}")
         entries = []
     return render_template('show_entries.html', entries=entries)
-    cur = db.execute('SELECT id, title, text FROM entries ORDER BY id DESC')
+@app.route('/')
+def show_entries():
+    db = get_db()
+    page = request.args.get('page', 1, type=int)
+    per_page = 10  # Number of entries per page
+    offset = (page - 1) * per_page
+    cur = db.execute('SELECT id, title, text FROM entries ORDER BY id DESC LIMIT ? OFFSET ?', (per_page, offset))
+    entries = cur.fetchall()
+    return render_template('show_entries.html', entries=entries, page=page)
+
+
+@app.route('/add', methods=['POST'])
     entries = cur.fetchall()
     return render_template('show_entries.html', entries=entries)
 
